@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#2563EB"    # Professional Blue
+backgroundColor = "#F8FAFC" # Very light grey-blue (not harsh white)
+secondaryBackgroundColor = "#E2E8F0" # Sidebar grey
+textColor = "#1E293B"       # Dark slate text
+font = "sans serif"

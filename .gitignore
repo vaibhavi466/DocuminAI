@@ -1,0 +1,31 @@
+# Python Virtual Environment
+venv/
+env/
+
+# The Dataset (Keep local only!)
+data/
+!data/*.dvc
+
+# Python Cache/Compiled files
+__pycache__/
+*.pyc
+
+# Environment Variables (Secrets)
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MLflow runs and models
+mlruns/
+models/
+
+# Model and checkpoint files
+*.ckpt
+*.bin
+*.safetensors
+
+# Optional: Ignore logs and temp files
+*.log
+*.tmp
+*.pt
