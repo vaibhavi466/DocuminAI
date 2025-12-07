@@ -1,3 +1,5 @@
+#STORES FILES SENT BY USER
+
 import os
 import re
 import pandas as pd

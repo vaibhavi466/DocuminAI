@@ -1,4 +1,7 @@
-import pytesseract
+#TESSARACT OCR
+
+
+import pytesseract  
 from PIL import Image # Python Imaging Library
 import os
 
