@@ -1,3 +1,10 @@
+# Add this to your imports
+from src.utils import init_db, save_to_db, get_db_history
+from src.summarization import generate_summary  # Ensure this is imported
+
+# Initialize the database immediately
+init_db()
+
 import streamlit as st
 import os
 import matplotlib.pyplot as plt
@@ -9,7 +16,8 @@ import pandas as pd
 from src.inference import predict_document
 from src.extraction import extract_information
 from src.summarization import generate_summary
-from src.utils import save_and_log, get_history, calculate_text_metrics, delete_history_entries
+# from src.utils import save_and_log, get_history, calculate_text_metrics, delete_history_entries
+from src.utils import init_db, save_to_db, get_db_history, calculate_text_metrics, delete_db_entries
 
 # 1. Page Config
 st.set_page_config(page_title="DocuMind AI", page_icon="📄", layout="wide")
@@ -131,6 +139,7 @@ if page == "Analysis Dashboard":
             analyze_btn = st.button('🚀 Analyze & Archive Document', use_container_width=True, type="primary")
 
         # Logic
+        # Logic
         if analyze_btn:
             with st.spinner('🔍 Scanning & Processing...'):
                 # 1. Save temp
@@ -143,23 +152,35 @@ if page == "Analysis Dashboard":
                 # 2. Predict
                 label, confidence, extracted_text = predict_document(temp_path)
                 
-                # 3. Archive
-                log_msg = save_and_log(uploaded_file, uploaded_file.name, label, confidence)
-                st.toast(log_msg, icon="✅")
+                # --- LABEL FIX (Optional: Keep this if you are using the generic model) ---
+                label_map = {"LABEL_0": "Resume", "LABEL_1": "Email"}
+                if label in label_map:
+                    label = label_map[label]
+                # -------------------------------------------------------------------------
+
+                # 3. Generate Summary (New Step!)
+                # We generate this NOW so we can save it to the database immediately
+                summary = generate_summary(extracted_text)
+
+                # 4. Save to Database (Replaces 'save_and_log')
+                # This saves the Image, Text, Summary, and Metadata into 'documind.db'
+                db_msg = save_to_db(uploaded_file, label, confidence, extracted_text, summary)
+                st.toast(db_msg, icon="🗄️")
                 
-                # Save to Session State
+                # 5. Save to Session State
                 st.session_state['analyzed'] = True
                 st.session_state['label'] = label
                 st.session_state['confidence'] = confidence
                 st.session_state['text'] = extracted_text
-        
+                st.session_state['summary'] = summary  # Save summary so we don't run it again
+
+        # if analyze_btn:
         # --- RESULTS SECTION ---
         if st.session_state.get('analyzed'):
             st.markdown("---")
             
-            # 1. Classification Banner (Full Width)
+            # 1. Classification Banner
             st.subheader("1. Classification Result")
-            # Custom HTML Banner for result
             st.markdown(f"""
             <div style="background-color: #3730A3; padding: 15px; border-radius: 10px; border-left: 5px solid #818CF8;">
                 <h3 style="margin:0; color: white;">Category: {st.session_state['label'].upper()}</h3>
@@ -181,10 +202,12 @@ if page == "Analysis Dashboard":
             
             st.write("") # Spacer
             
+            # --- DEFINE COLUMNS HERE ---
+            # This line must be indented exactly 12 spaces (inside the 'if analyzed' block)
             col_left, col_right = st.columns(2)
             
+            # 3. Extraction (Left Column)
             with col_left:
-                # 3. Extraction
                 st.subheader("2. Extracted Entities")
                 details = extract_information(st.session_state['text'], st.session_state['label'])
                 if details:
@@ -192,12 +215,93 @@ if page == "Analysis Dashboard":
                 else:
                     st.warning("No specific patterns found.")
 
+            # 4. Summarization (Right Column)
             with col_right:
-                # 4. Summarization
                 st.subheader("3. AI Summary")
-                with st.spinner("Generating summary..."):
-                    summary = generate_summary(st.session_state['text'])
-                    st.success(summary)
+                if 'summary' in st.session_state:
+                    st.success(st.session_state['summary'])
+                else:
+                    st.info("Summary available after analysis.")
+
+
+        #     with st.spinner('🔍 Scanning & Processing...'):
+        #         # 1. Save temp
+        #         if not os.path.exists("data"):
+        #             os.makedirs("data")
+        #         temp_path = os.path.join("data", "temp_upload.jpg")
+        #         with open(temp_path, "wb") as f:
+        #             f.write(uploaded_file.getbuffer())
+                
+        #         # 2. Predict
+        #         label, confidence, extracted_text = predict_document(temp_path)
+                
+        #         # 3. Archive
+        #         log_msg = save_and_log(uploaded_file, uploaded_file.name, label, confidence)
+        #         st.toast(log_msg, icon="✅")
+                
+        #         # Save to Session State
+        #         st.session_state['analyzed'] = True
+        #         st.session_state['label'] = label
+        #         st.session_state['confidence'] = confidence
+        #         st.session_state['text'] = extracted_text
+        
+        # --- RESULTS SECTION ---
+        # if st.session_state.get('analyzed'):
+        #     st.markdown("---")
+            
+        #     # 1. Classification Banner (Full Width)
+        #     st.subheader("1. Classification Result")
+        #     # Custom HTML Banner for result
+        #     st.markdown(f"""
+        #     <div style="background-color: #3730A3; padding: 15px; border-radius: 10px; border-left: 5px solid #818CF8;">
+        #         <h3 style="margin:0; color: white;">Category: {st.session_state['label'].upper()}</h3>
+        #         <p style="margin:0; color: #C7D2FE;">Confidence Score: {st.session_state['confidence']:.2%}</p>
+        #     </div>
+        #     """, unsafe_allow_html=True)
+            
+        #     st.write("") # Spacer
+
+        #     # 2. Text Stats (Cards)
+        #     st.subheader("📝 Text Metrics")
+        #     metrics = calculate_text_metrics(st.session_state['text'])
+        #     if metrics:
+        #         c1, c2, c3, c4 = st.columns(4)
+        #         c1.metric("Word Count", metrics["Word Count"])
+        #         c2.metric("Sentences", metrics["Sentence Count"])
+        #         c3.metric("Avg Word Len", metrics["Avg Word Length"])
+        #         c4.metric("Readability", metrics["Readability Score (ARI)"])
+            
+        #     st.write("") # Spacer
+            
+        #     col_left, col_right = st.columns(2)
+            
+        #     with col_left:
+        #         # 3. Extraction
+        #         st.subheader("2. Extracted Entities")
+        #         details = extract_information(st.session_state['text'], st.session_state['label'])
+        #         if details:
+        #             st.table(pd.DataFrame(list(details.items()), columns=["Field", "Value"]))
+        #         else:
+        #             st.warning("No specific patterns found.")
+
+        #     # with col_right:
+        #     #     # 4. Summarization
+        #     #     st.subheader("3. AI Summary")
+        #     #     with st.spinner("Generating summary..."):
+        #     #         summary = generate_summary(st.session_state['text'])
+        #     #         st.success(summary)
+        #     # NEW CODE
+        # # This is likely inside the 'if st.session_state.get('analyzed'):' block
+        #     with col_right:
+        #         # 4. Summarization -> Make sure this line is indented
+        #         st.subheader("3. AI Summary")
+            
+        #     # These lines must ALSO be indented to align with st.subheader
+        #         if 'summary' in st.session_state:
+        #             st.success(st.session_state['summary'])
+        #         else:
+        #             st.info("Summary available after analysis.")
+
 
             # 5. Visual Analytics
             st.subheader("4. Context Cloud")
@@ -216,6 +320,33 @@ if page == "Analysis Dashboard":
 # ==========================================
 # PAGE 2: HISTORY LOG
 # ==========================================
+# NEW CODE
+elif page == "History Log":
+    st.title("📜 Database History")
+    st.write("View all archived documents stored in SQLite.")
+    
+    # 1. Get Data from DB
+    df_history = get_db_history()
+    
+    if not df_history.empty:
+        # 2. Display Data
+        st.dataframe(
+            df_history,
+            column_config={
+                "upload_date": st.column_config.DatetimeColumn("Upload Date", format="D MMM YYYY, h:mm a"),
+                "filename": st.column_config.TextColumn("File Name"),
+                "category": st.column_config.TextColumn("Category"),
+                "confidence": st.column_config.ProgressColumn("Confidence", min_value=0, max_value=1.0, format="%.2f"),
+                "summary": st.column_config.TextColumn("Summary", width="large"),
+            },
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.info("No documents found in the database yet.")
+
+
+
 elif page == "History Log":
     st.title("📜 Process History")
     st.write("Manage your archived document logs below.")
@@ -241,42 +372,84 @@ elif page == "History Log":
         )
         
         rows_to_delete = edited_df[edited_df.Select].index
+
         
         if len(rows_to_delete) > 0:
             st.warning(f"⚠️ You have selected {len(rows_to_delete)} document(s) to delete.")
+            
             if st.button("🗑️ Delete Selected", type="primary"):
-                success = delete_history_entries(rows_to_delete)
+                # Get the actual Database IDs (hidden in the dataframe)
+                ids_to_delete = edited_df.loc[rows_to_delete, "id"].tolist()
+                
+                success = delete_db_entries(ids_to_delete)
                 if success:
                     st.success("Entries deleted successfully!")
                     st.rerun()
                 else:
                     st.error("Error deleting entries.")
+        
+        # if len(rows_to_delete) > 0:
+        #     st.warning(f"⚠️ You have selected {len(rows_to_delete)} document(s) to delete.")
+        #     if st.button("🗑️ Delete Selected", type="primary"):
+        #         success = delete_history_entries(rows_to_delete)
+        #         if success:
+        #             st.success("Entries deleted successfully!")
+        #             st.rerun()
+        #         else:
+        #             st.error("Error deleting entries.")
     else:
         st.info("No documents processed yet.")
+
 
 # ==========================================
 # PAGE 3: ANALYTICS
 # ==========================================
+# NEW CODE
 elif page == "System Analytics":
     st.title("📊 System Analytics")
     
-    df_history = get_history()
+    df_history = get_db_history()
+    
     if not df_history.empty:
         colA, colB = st.columns(2)
         
         with colA:
             st.subheader("Uploads by Category")
-            st.bar_chart(df_history['Predicted_Category'].value_counts())
+            # Database column is 'category'
+            st.bar_chart(df_history['category'].value_counts())
             
         with colB:
             st.subheader("AI Confidence Trend")
             try:
-                df_history['Conf_Value'] = df_history['Confidence'].str.rstrip('%').astype('float')
-                st.line_chart(df_history['Conf_Value'])
+                # Database stores confidence as a float (0.95), not string ("95%")
+                # So we don't need to strip '%' anymore!
+                st.line_chart(df_history['confidence'])
             except:
                 st.write("Insufficient data for trend analysis.")
     else:
         st.info("No data available. Process some documents first!")
+
+
+# elif page == "System Analytics":
+#     st.title("📊 System Analytics")
+    
+#     df_history = get_history()
+#     if not df_history.empty:
+#         colA, colB = st.columns(2)
+        
+#         with colA:
+#             st.subheader("Uploads by Category")
+#             st.bar_chart(df_history['Predicted_Category'].value_counts())
+            
+#         with colB:
+#             st.subheader("AI Confidence Trend")
+#             try:
+#                 df_history['Conf_Value'] = df_history['Confidence'].str.rstrip('%').astype('float')
+#                 st.line_chart(df_history['Conf_Value'])
+#             except:
+#                 st.write("Insufficient data for trend analysis.")
+#     else:
+#         st.info("No data available. Process some documents first!")
 
 
 # import streamlit as st
