@@ -89,3 +89,21 @@ def calculate_text_metrics(text):
         "Avg Word Length": f"{avg_word_length:.1f} chars",
         "Readability Score (ARI)": ari_score
     }
+
+
+def delete_history_entries(indices_to_delete):
+    """
+    Deletes specific rows from the history log CSV based on their indices.
+    """
+    if os.path.exists(HISTORY_FILE):
+        # Read the current file
+        df = pd.read_csv(HISTORY_FILE)
+        
+        # Drop the selected rows
+        # 'errors="ignore"' prevents crashing if an index is missing
+        df = df.drop(indices_to_delete, errors="ignore")
+        
+        # Save back to CSV
+        df.to_csv(HISTORY_FILE, index=False)
+        return True
+    return False
