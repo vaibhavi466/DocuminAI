@@ -9,8 +9,10 @@ import os
 # We load the model from the folder where training will save it
 MODEL_DIR = os.path.join("models", "documind_v1") 
 
+
 # Tesseract Path (Keep your existing path)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 
 def predict_document(image_path):
     """
