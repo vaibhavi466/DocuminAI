@@ -11,12 +11,51 @@ There is a need for an intelligent system that can automatically extract, summar
 
 ## Tech Stack
 
-* **Frontend:** HTML,React.js(Vite)
-* **Backend:** Python (FastAPI)
-* **AI Engine:** OpenAI (GEMINI-FLASH-LATEST)
-* **Orchestration:** LangChain
-* **Vector Database:** Pinecone,FAISS
-* **File Processing**	Pdfplumber
+## 🛠️ Tech Stack
+
+### 🔹 Programming & Core
+- Python  
+
+### 🔹 Frontend / UI
+- Streamlit  
+
+### 🔹 Backend / API
+- FastAPI  
+
+### 🔹 NLP & LLM
+- HuggingFace Transformers  
+- OpenAI API / LLM APIs  
+- LangChain  
+
+### 🔹 OCR (Text Extraction)
+- Tesseract OCR  
+- EasyOCR  
+
+### 🔹 Document Processing
+- PyPDFLoader / PDFPlumber  
+- Unstructured  
+
+### 🔹 Embeddings & Vector Database
+- FAISS / ChromaDB / Pinecone  
+
+### 🔹 RAG Pipeline
+- LangChain (Retrieval-Augmented Generation)  
+
+### 🔹 Machine Learning Models
+- CNN / RNN / LayoutLM  
+
+### 🔹 Named Entity Recognition (NER)
+- SpaCy  
+- Transformer-based NER models  
+
+### 🔹 MLOps & Experiment Tracking
+- MLflow  
+- DVC (Data Version Control)  
+
+### 🔹 Data Handling & Visualization
+- Pandas  
+- NumPy  
+- Matplotlib / Seaborn  
 
 ## Features Implemented
 * Built a Streamlit web application for automated document classification and real-time processing.
