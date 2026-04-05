@@ -1,7 +1,8 @@
 ### DOCUMIND AI
-
+DocuMind AI is an end-to-end intelligent document processing system designed to transform unstructured documents into meaningful, searchable, and actionable insights using modern AI techniques.
 ## Problem Statement:
-
+Organizations generate massive volumes of unstructured documents, making manual processing slow, error-prone, and inefficient.  
+There is a need for an intelligent system that can automatically extract, summarize, and organize information for faster and more accurate decision-making.
 ## Team Members
 
 1. **PUSHPALATA** (20232028) - (https://github.com/Pushpalata-S)
