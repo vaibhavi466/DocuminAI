@@ -18,8 +18,11 @@
 * **File Processing**	Pdfplumber
 
 ## Features Implemented
-*
-*
+* Built a Streamlit web application for automated document classification and real-time processing.
+* Extracted text from images and PDFs using Tesseract OCR and OpenCV.
+* Trained a custom NLP model using PyTorch and Hugging Face Transformers for precise information
+extraction and confidence scoring.
+* Tracked machine learning experiments and managed datasets using MLflow.
 
 ## System Architecture
 
