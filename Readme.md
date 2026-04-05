@@ -55,30 +55,6 @@ extraction and confidence scoring.
 ## Working Features 
 https://github.com/user-attachments/assets/30d06656-169c-45b8-8d0e-7819c74aef8a
 
-## System Architecture
-
-
-## API Documentation
-*
-*
-
-## SetUp Instructions
-* 
-
-
-
-## Error Handling and reliability features
-
-* 
-
-
-## AI/ML integration details
-* 
-  
-## Future Improvements
-* 
-* **Deployment of project**
-
 
 
 
