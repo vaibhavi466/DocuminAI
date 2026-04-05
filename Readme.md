@@ -51,6 +51,10 @@ There is a need for an intelligent system that can automatically extract, summar
 extraction and confidence scoring.
 * Tracked machine learning experiments and managed datasets using MLflow.
 
+
+## Working Features 
+https://github.com/user-attachments/assets/30d06656-169c-45b8-8d0e-7819c74aef8a
+
 ## System Architecture
 
 
@@ -62,8 +66,6 @@ extraction and confidence scoring.
 * 
 
 
-## Working Features 
-https://github.com/user-attachments/assets/30d06656-169c-45b8-8d0e-7819c74aef8a
 
 ## Error Handling and reliability features
 
